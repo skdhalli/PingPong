@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- From: file:/C:/Users/c_said/AndroidStudioProjects/PingPong/services/src/main/res/values/strings.xml -->
+    <eat-comment />
+
+    <string name="app_name">Ping Pong</string>
+
+</resources>

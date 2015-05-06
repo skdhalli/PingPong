@@ -7,10 +7,8 @@ import android.content.IntentFilter;
 import com.pingpong.services.ConnectivityStatsBroadcast;
 import com.pingpong.services.ConnectivityStatsStorage;
 import com.pingpong.services.ConnectivityStatsUpload;
-import com.pingpong.services.RestServiceClient;
-import com.pingpong.services.SQLLiteHelper;
+import com.pingpong.services.StorageHandler;
 
-import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
@@ -27,22 +25,20 @@ public class MainActivity extends ActionBarActivity {
 
     private static final String technology = "Wifi";
     final String newline = System.getProperty("line.separator");
-
+    private StorageHandler storageHandler = new StorageHandler(this);
     //private final ConnectivityStatsStorage connectivityStatsStorage = new ConnectivityStatsStorage();
     //private Intent statsBroadCastIntent = new Intent(this, ConnectivityStatsBroadcast.class);
     //private final IntentFilter connectivity_stats_ready_filter = new IntentFilter(ConnectivityStatsBroadcast.status_ready_indicator);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        SQLLiteHelper helper = new SQLLiteHelper(this.getApplicationContext());
-        helper.onUpgrade(helper.getWritableDatabase(), 1,1);
 
         TelephonyManager telephonyManager = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
         //Log.d("Trace", "Device ID: "+ telephonyManager.getDeviceId());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ConnectivityStatsStorage connectivityStatsStorage = new ConnectivityStatsStorage();
+        ConnectivityStatsStorage connectivityStatsStorage = new ConnectivityStatsStorage(storageHandler);
 
         IntentFilter connectivity_stats_ready_filter = new IntentFilter(ConnectivityStatsBroadcast.status_ready_indicator);
         connectivity_stats_ready_filter.addCategory(Intent.CATEGORY_DEFAULT);

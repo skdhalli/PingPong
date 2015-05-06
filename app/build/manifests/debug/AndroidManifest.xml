@@ -13,7 +13,7 @@
         </activity>
     </application>
 
-    <!-- From: file:/C:/Users/c_said/AppData/Local/Temp/manifestMerge1443467948516082625.xml -->
+    <!-- From: file:/C:/Users/c_said/AppData/Local/Temp/manifestMerge8883404995539687544.xml -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- From: file:/C:/Users/c_said/AndroidStudioProjects/PingPong/app/src/main/AndroidManifest.xml -->

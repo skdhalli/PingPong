@@ -32,8 +32,6 @@ public class ConnectivityStatsBroadcast extends IntentService {
     public  static final String location_stats_filter = "Location Info";
     final String newline = System.getProperty("line.separator");
     long broadcast_frequency_milliseconds = 10000;
-    long locationBuffer = 5000;
-    long connectivityBuffer = 5000;
 
     public ConnectivityStatsBroadcast()
     {
@@ -51,7 +49,7 @@ public class ConnectivityStatsBroadcast extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent)
     {
-        //SQLLiteHelper helper = new SQLLiteHelper(this.getApplicationContext());
+        //StorageHandler helper = new StorageHandler(this.getApplicationContext());
         //helper.onUpgrade(helper.getWritableDatabase(), 1,1);
 
         Intent broadcastIntent = new Intent();
@@ -82,13 +80,14 @@ public class ConnectivityStatsBroadcast extends IntentService {
         if(statsGenerator != null)
         {
             String json = null;
-            //repeat this action
+            //repeat this action in a loop
             do {
+
                 try {
+                    Thread.sleep(broadcast_frequency_milliseconds);
                     json = statsGenerator.GetResultsJSON();
                     broadcastIntent.putExtra(network_stats_filter, json);
                     sendBroadcast(broadcastIntent);
-                    Thread.sleep(broadcast_frequency_milliseconds);
                     }
                 catch(Exception e){
                         e.printStackTrace();

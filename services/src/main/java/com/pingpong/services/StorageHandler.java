@@ -13,7 +13,7 @@ import java.util.Iterator;
 /**
  * Created by sdhalli on 5/5/2015.
  */
-public class SQLLiteHelper extends SQLiteOpenHelper {
+public class StorageHandler extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "ConnectivityStats.db";
@@ -22,52 +22,61 @@ public class SQLLiteHelper extends SQLiteOpenHelper {
             "TIMESTAMP INTEGER);";
     private static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS CONNECTIVITY_STATS;";
 
-    public SQLLiteHelper(Context context) {
+
+    public StorageHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+
     }
     public void onCreate(SQLiteDatabase db) {
+        Log.d("Trace", "OnCreate - Creating tables");
         db.execSQL(SQL_CREATE_ENTRIES);
+        Log.d("Trace", "OnCreate - Created tables");
     }
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // This database is only a cache for online data, so its upgrade policy is
         // to simply to discard the data and start over
-        Log.d("Trace", "Trying to delete and re-create table ");
+        Log.d("Trace", "Deleting tables");
         db.execSQL(SQL_DELETE_ENTRIES);
+        Log.d("Trace", "Deleted tables");
+        Log.d("Trace", "Creating tables");
         onCreate(db);
-        Log.d("Trace", "Database is ready");
+        Log.d("Trace", "Created tables");
+
     }
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         onUpgrade(db, oldVersion, newVersion);
     }
 
-    public void UploadConnectionStat(double rssi, long frequency, String capabilities, String bssid, String ssid, long timestamp, double latitude, double longitude)
+    public void StoreConnectionStat(ConnectionStat connectionStat)
     {
         String insert_sql = "insert into CONNECTIVITY_STATS (rssi, frequency, capabilities, bssid, ssid, timestamp, latitude, longitude) " +
-                "values("+rssi+","+frequency+",'"+capabilities+"','"+bssid+"', '"+ssid+"', "+timestamp+", "+latitude+", "+longitude+")";
-        SQLiteDatabase conn_db = this.getWritableDatabase();
-        conn_db.beginTransaction();
+                "values("+connectionStat.rssi+","+connectionStat.frequency+",'"+connectionStat.capabilities+"','"+connectionStat.bssid+"', '"+connectionStat.ssid+"', "+connectionStat.timestamp+", "+connectionStat.latitude+", "+connectionStat.longitude+")";
+        SQLiteDatabase writableDatabase = this.getWritableDatabase();
         //Log.d("Trace", insert_sql);
-        conn_db.execSQL(insert_sql);
-        //Log.d("Trace", "Executed insert");
-        conn_db.endTransaction();
-
+        writableDatabase.execSQL(insert_sql);
+        Log.d("Trace", "Executed insert command.");
+        SQLiteDatabase readableDatabase = this.getReadableDatabase();
+        String select_sql = "Select * from Connectivity_Stats";
+        Cursor cursor = readableDatabase.rawQuery(select_sql, null);
+        int count = cursor.getCount();
+        cursor.close();
+        Log.d("Trace", "Total # of stats while pushing: "+count);
+        writableDatabase.close();
     }
 
-    public  ConnectionStat GetEarliestConnectionStat()
+    public  ConnectionStat GetUploadReadyConnectionStat()
     {
         ConnectionStat retval = null;
-        String select_sql = "Select STAT_ID, rssi, frequency, capabilities, bssid, ssid, timestamp, latitude, longitude from CONNECTIVITY_STATS order by STAT_ID ASC";
-        SQLiteDatabase conn_db = this.getWritableDatabase();
-        conn_db.beginTransaction();
+        String select_sql = "Select STAT_ID, rssi, frequency, capabilities, bssid, ssid, timestamp, latitude, longitude from CONNECTIVITY_STATS order by STAT_ID ASC limit 1";
+        SQLiteDatabase writableDatabase = this.getWritableDatabase();
+        SQLiteDatabase readableDatabase = this.getReadableDatabase();
         //Log.d("Trace", insert_sql);
-        Cursor cursor = conn_db.rawQuery(select_sql, null);
-        cursor.moveToFirst();
-        //if(cursor.moveToFirst())
-        //{
+        Cursor cursor = readableDatabase.rawQuery(select_sql, null);
+        if(cursor != null && cursor.moveToFirst())
+        {
             retval = new ConnectionStat();
             int stat_id = cursor.getInt(0);
-            String delete_sql = "Delete from connectivity_stats where stat_id = "+stat_id;
-            conn_db.execSQL(delete_sql);
+            retval.stat_id = stat_id;
             retval.rssi = cursor.getDouble(1);
             retval.frequency = cursor.getLong(2);
             retval.capabilities = cursor.getString(3);
@@ -76,21 +85,23 @@ public class SQLLiteHelper extends SQLiteOpenHelper {
             retval.timestamp = cursor.getLong(6);
             retval.latitude = cursor.getDouble(7);
             retval.longitude = cursor.getDouble(8);
-        //}
+
+            String delete_sql = "Delete from connectivity_stats where stat_id = "+stat_id;
+            writableDatabase.execSQL(delete_sql);
+        }
+        cursor.close();
+        String count_sql = "Select * from Connectivity_Stats";
+        cursor = readableDatabase.rawQuery(count_sql, null);
+        int count = cursor.getCount();
+        cursor.close();
+        Log.d("Trace", "Total # of stats while pulling: "+count);
+
+        writableDatabase.close();
+        readableDatabase.close();
         //Log.d("Trace", "Executed insert");
-        conn_db.endTransaction();
+
         return retval;
     }
 
-    public class ConnectionStat
-    {
-        public double rssi;
-        public long frequency;
-        public String capabilities;
-        public String bssid;
-        public String ssid;
-        public long timestamp;
-        public double latitude;
-        public double longitude;
-    }
+
 }

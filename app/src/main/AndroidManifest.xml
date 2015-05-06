@@ -11,6 +11,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <service android:name="com.pingpong.services.ConnectivityStatsBroadcast" android:enabled="true" android:exported="false"/>
+        <service android:name="com.pingpong.services.ConnectivityStatsUpload" android:enabled="true" android:exported="false"/>
         <activity
             android:name="com.pingpong.app.MainActivity"
             android:label="@string/app_name" >

@@ -31,13 +31,13 @@ public class ConnectivityStatsBroadcast extends IntentService {
     public  static  final String network_stats_filter = "Network Stats";
     public  static final String location_stats_filter = "Location Info";
     final String newline = System.getProperty("line.separator");
-    long broadcast_frequency_milliseconds = 2000;
+    long broadcast_frequency_milliseconds = 10000;
     long locationBuffer = 5000;
     long connectivityBuffer = 5000;
 
     public ConnectivityStatsBroadcast()
     {
-        super("ConnectivityManager");
+        super("ConnectivityStatsBroadcast");
 
     }
 
@@ -51,6 +51,9 @@ public class ConnectivityStatsBroadcast extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent)
     {
+        //SQLLiteHelper helper = new SQLLiteHelper(this.getApplicationContext());
+        //helper.onUpgrade(helper.getWritableDatabase(), 1,1);
+
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(status_ready_indicator);
         broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);

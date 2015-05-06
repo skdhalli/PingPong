@@ -29,8 +29,10 @@ public class WIFIStats extends LocationTracker implements IStatsGenerator {
     }
 
     private  WifiManager wifiManager;
-
-
+    private boolean logConnectedStats = false;
+    public static String Scanned_Results_Tag = "Scanned Results";
+    public static  String Location_Tag = "Location";
+    public static  String Connected_AP_Stats_Tag = "Connected AP Stats";
     public  boolean IsConnected()
     {
         boolean retval = false;
@@ -46,11 +48,7 @@ public class WIFIStats extends LocationTracker implements IStatsGenerator {
             {
                 Location lastKnownLocation = GetLastKnownLocation();
                 JSONObject json = new JSONObject();
-                //Get the location
-                JSONObject locationJson = new JSONObject();
-                locationJson.put("Latitude", lastKnownLocation.getLatitude());
-                locationJson.put("Longitude", lastKnownLocation.getLongitude());
-                json.put("Location", locationJson.toString());
+
 
                 //Sniffing all access points
                 List<ScanResult> scanResultList = wifiManager.getScanResults();
@@ -67,25 +65,32 @@ public class WIFIStats extends LocationTracker implements IStatsGenerator {
                     scanResultJson.put("SSID", scanResult.SSID);
                     scanResults.put(scanResultJson);
                 }
-                json.put("Scanned Results", scanResults);
+                json.put(Scanned_Results_Tag, scanResults);
 
+                //Get the location
+                JSONObject locationJson = new JSONObject();
+                locationJson.put("Latitude", lastKnownLocation.getLatitude());
+                locationJson.put("Longitude", lastKnownLocation.getLongitude());
+                json.put(Location_Tag, locationJson);
                   //From Wifi Info of connected AP
-                WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-                if(wifiInfo != null) {
-                   JSONObject connectedStatsJson = new JSONObject();
-                   connectedStatsJson.put("RSSI", wifiInfo.getRssi());
-                   connectedStatsJson.put("BSSID", wifiInfo.getBSSID());
-                   connectedStatsJson.put("Hidden SSID", wifiInfo.getHiddenSSID());
-                   connectedStatsJson.put("IP Address", wifiInfo.getIpAddress());
-                   connectedStatsJson.put("Link speed", wifiInfo.getLinkSpeed());
-                   connectedStatsJson.put("Mac address", wifiInfo.getMacAddress());
-                   connectedStatsJson.put("Network ID", wifiInfo.getNetworkId());
-                   connectedStatsJson.put("SSID", wifiInfo.getSSID());
-                   connectedStatsJson.put("Supplicant State", wifiInfo.getSupplicantState().toString());
-                   connectedStatsJson.put("Signal Level", wifiManager.calculateSignalLevel(wifiInfo.getRssi(), 5));
-                   connectedStatsJson.put("DHCP Info", wifiManager.getDhcpInfo().toString());
-                   json.put("Connected AP Stats", connectedStatsJson);
-               }
+                if(logConnectedStats) {
+                    WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+                    if (wifiInfo != null) {
+                        JSONObject connectedStatsJson = new JSONObject();
+                        connectedStatsJson.put("RSSI", wifiInfo.getRssi());
+                        connectedStatsJson.put("BSSID", wifiInfo.getBSSID());
+                        connectedStatsJson.put("Hidden SSID", wifiInfo.getHiddenSSID());
+                        connectedStatsJson.put("IP Address", wifiInfo.getIpAddress());
+                        connectedStatsJson.put("Link speed", wifiInfo.getLinkSpeed());
+                        connectedStatsJson.put("Mac address", wifiInfo.getMacAddress());
+                        connectedStatsJson.put("Network ID", wifiInfo.getNetworkId());
+                        connectedStatsJson.put("SSID", wifiInfo.getSSID());
+                        connectedStatsJson.put("Supplicant State", wifiInfo.getSupplicantState().toString());
+                        connectedStatsJson.put("Signal Level", wifiManager.calculateSignalLevel(wifiInfo.getRssi(), 5));
+                        connectedStatsJson.put("DHCP Info", wifiManager.getDhcpInfo().toString());
+                        json.put(Connected_AP_Stats_Tag, connectedStatsJson);
+                    }
+                }
                 retval = json.toString();
 
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");

@@ -5,8 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import com.pingpong.services.ConnectivityStatsBroadcast;
+import com.pingpong.services.ConnectivityStatsStorage;
 import com.pingpong.services.ConnectivityStatsUpload;
 import com.pingpong.services.RestServiceClient;
+import com.pingpong.services.SQLLiteHelper;
 
 import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
@@ -25,26 +27,37 @@ public class MainActivity extends ActionBarActivity {
 
     private static final String technology = "Wifi";
     final String newline = System.getProperty("line.separator");
-    //final String registration_url = "http://198.199.116.105/ConnectivityStats/registration.php";
-    public static String DeviceID;
+
+    //private final ConnectivityStatsStorage connectivityStatsStorage = new ConnectivityStatsStorage();
+    //private Intent statsBroadCastIntent = new Intent(this, ConnectivityStatsBroadcast.class);
+    //private final IntentFilter connectivity_stats_ready_filter = new IntentFilter(ConnectivityStatsBroadcast.status_ready_indicator);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SQLLiteHelper helper = new SQLLiteHelper(this.getApplicationContext());
+        helper.onUpgrade(helper.getWritableDatabase(), 1,1);
+
         TelephonyManager telephonyManager = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
         //Log.d("Trace", "Device ID: "+ telephonyManager.getDeviceId());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        IntentFilter filter = new IntentFilter(ConnectivityStatsBroadcast.status_ready_indicator);
-        filter.addCategory(Intent.CATEGORY_DEFAULT);
-        //dummy - until i finish testing
-        registerReceiver(broadcastReceiver, filter);
-        //registerReceiver(connectivityStatsUpload, filter);
+        ConnectivityStatsStorage connectivityStatsStorage = new ConnectivityStatsStorage();
 
+        IntentFilter connectivity_stats_ready_filter = new IntentFilter(ConnectivityStatsBroadcast.status_ready_indicator);
+        connectivity_stats_ready_filter.addCategory(Intent.CATEGORY_DEFAULT);
+        registerReceiver(connectivityStatsStorage, connectivity_stats_ready_filter);
 
-        Intent intent = new Intent(this, ConnectivityStatsBroadcast.class);
-        intent.putExtra("Technology", technology);
-        startService(intent);
+        //Broadcast intent service
+        Intent statsBroadCastIntent = new Intent(this, ConnectivityStatsBroadcast.class);
+        statsBroadCastIntent.putExtra("Technology", technology);
+        startService(statsBroadCastIntent);
+
+        //Upload intent service
+        Intent statsUploadIntent = new Intent(this, ConnectivityStatsUpload.class);
+        startService(statsUploadIntent);
     }
+
 
 
     @Override
@@ -67,7 +80,7 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private ConnectivityStatsUpload connectivityStatsUpload = new ConnectivityStatsUpload();
+
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override

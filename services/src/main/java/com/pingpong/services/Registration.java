@@ -6,11 +6,11 @@ import android.os.Build;
  * Created by sdhalli on 5/4/2015.
  */
 public class Registration {
-    private final String registration_base = "http://198.199.116.105/ConnectivityStats/registration.php";
+    private static final String registration_base = "http://198.199.116.105/ConnectivityStats/registration.php";
 
-    private String deviceID;
+    private static String deviceID;
 
-    public String GetDeviceID() throws Exception {
+    public static String GetDeviceID() throws Exception {
         if(deviceID == null)
         {
             registerDevice();
@@ -18,7 +18,7 @@ public class Registration {
         return deviceID;
     }
 
-    private void registerDevice() throws Exception {
+    private static void registerDevice() throws Exception {
         //check if device is registered
         RestServiceClient restServiceClient = new RestServiceClient(registration_base);
         restServiceClient.AddParam("mode", "check");

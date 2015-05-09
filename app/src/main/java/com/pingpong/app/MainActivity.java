@@ -3,16 +3,13 @@ package com.pingpong.app;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import com.pingpong.services.ConnectivityStatsBroadcast;
+
 import com.pingpong.services.ConnectivityStatsStorage;
 import com.pingpong.services.ConnectivityStatsUpload;
-import com.pingpong.services.StorageHandler;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -25,10 +22,10 @@ public class MainActivity extends ActionBarActivity {
 
     private static final String technology = "Wifi";
     final String newline = System.getProperty("line.separator");
-    private StorageHandler storageHandler = new StorageHandler(this);
+    //private StorageHandler storageHandler = new StorageHandler(this);
     //private final ConnectivityStatsStorage connectivityStatsStorage = new ConnectivityStatsStorage();
-    //private Intent statsBroadCastIntent = new Intent(this, ConnectivityStatsBroadcast.class);
-    //private final IntentFilter connectivity_stats_ready_filter = new IntentFilter(ConnectivityStatsBroadcast.status_ready_indicator);
+    //private Intent statsBroadCastIntent = new Intent(this, ConnectivityStatsStorage.class);
+    //private final IntentFilter connectivity_stats_ready_filter = new IntentFilter(ConnectivityStatsStorage.status_ready_indicator);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,19 +35,20 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ConnectivityStatsStorage connectivityStatsStorage = new ConnectivityStatsStorage(storageHandler);
+        //ConnectivityStatsStorage connectivityStatsStorage = new ConnectivityStatsStorage();
 
-        IntentFilter connectivity_stats_ready_filter = new IntentFilter(ConnectivityStatsBroadcast.status_ready_indicator);
-        connectivity_stats_ready_filter.addCategory(Intent.CATEGORY_DEFAULT);
-        registerReceiver(connectivityStatsStorage, connectivity_stats_ready_filter);
+        //IntentFilter connectivity_stats_ready_filter = new IntentFilter(ConnectivityStatsStorage.status_ready_indicator);
+        //connectivity_stats_ready_filter.addCategory(Intent.CATEGORY_DEFAULT);
+        //registerReceiver(connectivityStatsStorage, connectivity_stats_ready_filter);
 
         //Broadcast intent service
-        Intent statsBroadCastIntent = new Intent(this, ConnectivityStatsBroadcast.class);
+        Intent statsBroadCastIntent = new Intent(this, ConnectivityStatsStorage.class);
         statsBroadCastIntent.putExtra("Technology", technology);
         startService(statsBroadCastIntent);
 
         //Upload intent service
         Intent statsUploadIntent = new Intent(this, ConnectivityStatsUpload.class);
+        statsUploadIntent.putExtra("Technology", technology);
         startService(statsUploadIntent);
     }
 
@@ -81,7 +79,7 @@ public class MainActivity extends ActionBarActivity {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String connection_json = intent.getStringExtra(ConnectivityStatsBroadcast.network_stats_filter);
+            String connection_json = intent.getStringExtra(ConnectivityStatsStorage.network_stats_filter);
             SimpleDateFormat s = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
             String format = s.format(new Date());
             System.getProperty("os.version");

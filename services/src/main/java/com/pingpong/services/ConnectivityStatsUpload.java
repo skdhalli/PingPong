@@ -9,29 +9,41 @@ import android.util.Log;
  */
 public class ConnectivityStatsUpload extends IntentService {
 
-    long upload_frequency_milliseconds = 100;
+    long upload_frequency_milliseconds = 1000;
+    String technology = "";
+
     public ConnectivityStatsUpload() {
         super("ConnectivityStatsUpload");
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        technology = intent.getStringExtra("Technology");
         do {
-            try {
-                Thread.sleep(upload_frequency_milliseconds);}
+            try
+            {
+                Thread.sleep(upload_frequency_milliseconds);
+            }
             catch (InterruptedException e) {
                 e.printStackTrace();
             }
-                StorageHandler helper = new StorageHandler(this.getApplicationContext());
-                ConnectionStat connectionStat = helper.GetUploadReadyConnectionStat();
+
+            StorageHandler helper = new StorageHandler(this.getApplicationContext());
+            IConnectionStat connectionStat = helper.GetUploadReadyConnectionStat(technology);
             if(connectionStat != null)
             {
-                //upload to server
-                Log.d("Trace", "Upload stat - "+connectionStat.stat_id);
+                try
+                {
+                    connectionStat.Upload();
+                } catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+
             }
             else
             {
-                Log.d("Trace", "No data to upload");
+                //Log.d("Trace", "No data to upload");
             }
 
         }while (true);

@@ -1,7 +1,9 @@
 package com.pingpong.services;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 /**
@@ -19,6 +21,7 @@ public class ConnectivityStatsUpload extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         technology = intent.getStringExtra("Technology");
+        String device_unique_id = ((TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
         do {
             try
             {
@@ -34,7 +37,7 @@ public class ConnectivityStatsUpload extends IntentService {
             {
                 try
                 {
-                    connectionStat.Upload();
+                    connectionStat.Upload(device_unique_id);
                 } catch (Exception e)
                 {
                     e.printStackTrace();

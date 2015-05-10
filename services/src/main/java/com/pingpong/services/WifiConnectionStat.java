@@ -21,9 +21,9 @@ public class WifiConnectionStat implements IConnectionStat
     public double latitude;
     public double longitude;
 
-    public void Upload() throws Exception {
+    public void Upload(String device_unique_id) throws Exception {
 
-        String deviceid = Registration.GetDeviceID();
+        String deviceid = Registration.GetDeviceID(device_unique_id);
         restServiceClient.AddParam("deviceid", deviceid);
         restServiceClient.AddParam("technology", "WiFi");
         restServiceClient.AddParam("rssi", String.valueOf(rssi));
@@ -39,7 +39,7 @@ public class WifiConnectionStat implements IConnectionStat
         do {
             restServiceClient.Execute(RestServiceClient.RequestMethod.GET);
             String response = restServiceClient.getResponse();
-            success = response.split(":")[0] == "1";
+            success = response.split(":")[0].trim() == "1";
             num_retry++;
             if(num_retry > max_number_upload_retry)
             {

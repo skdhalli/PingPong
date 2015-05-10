@@ -6,5 +6,5 @@ package com.pingpong.services;
 public interface IConnectionStat
 {
 
-    public void Upload() throws Exception;
+    public void Upload(String device_unique_id) throws Exception;
 }

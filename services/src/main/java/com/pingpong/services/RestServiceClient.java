@@ -84,7 +84,7 @@ public class RestServiceClient {
                     combinedParams += "?";
                     for(NameValuePair p : params)
                     {
-                        String paramString = p.getName() + "=" + URLEncoder.encode(p.getValue(),"UTF - 8");
+                        String paramString = p.getName() + "=" + p.getValue();
                         if(combinedParams.length() > 1)
                         {
                             combinedParams  +=  "&" + paramString;

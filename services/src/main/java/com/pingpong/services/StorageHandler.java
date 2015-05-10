@@ -3,8 +3,12 @@ package com.pingpong.services;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDoneException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import java.sql.SQLClientInfoException;
+import java.sql.SQLException;
 
 /**
  * Created by sdhalli on 5/5/2015.
@@ -55,14 +59,29 @@ public class StorageHandler extends SQLiteOpenHelper {
         if(insert_sql != "") {
             SQLiteDatabase writableDatabase = this.getWritableDatabase();
             writableDatabase.execSQL(insert_sql);
-            writableDatabase.close();
+            int total_count = this.getCount();
+            Log.d("Trace", "Total count after inserting - "+total_count);
         }
     }
 
+    private int getCount()
+    {
+        int retval = 0;
+        SQLiteDatabase readableDatabase = this.getReadableDatabase();
+        String select_sql = "Select Count(*) from WIFI_CONNECTIVITY_STATS";
+        Cursor cursor = readableDatabase.rawQuery(select_sql, null);
+        if(cursor != null && cursor.moveToFirst()) {
+            retval = cursor.getInt(0);
+        }
+        if(cursor != null) {
+            cursor.close();
+        }
+        return  retval;
+    }
     public IConnectionStat GetUploadReadyConnectionStat(String technology)
     {
         IConnectionStat result = null;
-        if(technology.toUpperCase() == "WIFI") {
+        if(technology.toUpperCase().equals("WIFI")) {
             String select_sql = "Select STAT_ID, rssi, frequency, capabilities, bssid, ssid, timestamp, latitude, longitude from WIFI_CONNECTIVITY_STATS order by STAT_ID ASC limit 1";
             SQLiteDatabase writableDatabase = this.getWritableDatabase();
             SQLiteDatabase readableDatabase = this.getReadableDatabase();
@@ -81,8 +100,12 @@ public class StorageHandler extends SQLiteOpenHelper {
                 retval.latitude = cursor.getDouble(7);
                 retval.longitude = cursor.getDouble(8);
                 result = retval;
+                int total_count = this.getCount();
+                Log.d("Trace", "Total count before upload - "+total_count);
                 String delete_sql = "Delete from WIFI_CONNECTIVITY_STATS where stat_id = " + stat_id;
                 writableDatabase.execSQL(delete_sql);
+                total_count = this.getCount();
+                Log.d("Trace", "Total count after upload - "+total_count);
             }
             cursor.close();
             //String count_sql = "Select * from WIFI_CONNECTIVITY_STATS";

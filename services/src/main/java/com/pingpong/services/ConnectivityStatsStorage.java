@@ -33,7 +33,7 @@ public class ConnectivityStatsStorage extends IntentService {
     public  static  final String network_stats_filter = "Network Stats";
     public  static final String location_stats_filter = "Location Info";
     final String newline = System.getProperty("line.separator");
-    long broadcast_frequency_milliseconds = 5000;
+    long scan_frequency_milliseconds = 30000;
 
     public ConnectivityStatsStorage()
     {
@@ -43,8 +43,8 @@ public class ConnectivityStatsStorage extends IntentService {
 
     public void Change_Broadcast_Frequency(long broadcast_frequency_milliseconds)
     {
-        synchronized ((Object)this.broadcast_frequency_milliseconds) {
-            this.broadcast_frequency_milliseconds = broadcast_frequency_milliseconds;
+        synchronized ((Object)this.scan_frequency_milliseconds) {
+            this.scan_frequency_milliseconds = broadcast_frequency_milliseconds;
         }
     }
 
@@ -76,7 +76,7 @@ public class ConnectivityStatsStorage extends IntentService {
 
                     try
                     {
-                        Thread.sleep(broadcast_frequency_milliseconds);
+                        Thread.sleep(scan_frequency_milliseconds);
                     }
                     catch (InterruptedException e)
                     {
@@ -94,8 +94,8 @@ public class ConnectivityStatsStorage extends IntentService {
                             JSONObject scannedResult = scannedResults.getJSONObject(i);
                             String capabilities = scannedResult.getString("Capabilities");
 
-                            //if(WifiConnectionStat.security(capabilities).equals(WifiConnectionStat.OPEN))
-                            //{
+                            if(WifiConnectionStat.security(capabilities).equals(WifiConnectionStat.OPEN))
+                            {
                                 WifiConnectionStat wifiConnectionStat = new WifiConnectionStat();
                                 double rssi = scannedResult.getDouble("RSSI");
                                 long frequency = scannedResult.getLong("Frequency");
@@ -107,9 +107,9 @@ public class ConnectivityStatsStorage extends IntentService {
                                 wifiConnectionStat.Log(rssi, frequency, capabilities, bssid,
                                         ssid, timestamp, latitude, longitude);
                                 wifiConnectionStat.Store(this.getApplicationContext());
-                            //}
+                            }
                         }
-                    } catch (JSONException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 

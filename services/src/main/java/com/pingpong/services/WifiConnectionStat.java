@@ -5,6 +5,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 /**
  * Created by sdhalli on 5/6/2015.
  */
@@ -116,13 +119,12 @@ public class WifiConnectionStat implements IConnectionStat
 
     public void Log(double rssi, long frequency, String capabilities, String bssid,
                     String ssid, long timestamp, double latitude,
-                    double longitude)
-    {
+                    double longitude) throws UnsupportedEncodingException {
         this.rssi = rssi;
         this.frequency = frequency;
         this.capabilities = capabilities;
-        this.bssid = bssid;
-        this.ssid = ssid;
+        this.bssid = bssid.replace(" ", "%20");
+        this.ssid = ssid.replace(" ", "%20");
         this.timestamp = timestamp;
         this.latitude = latitude;
         this.longitude = longitude;

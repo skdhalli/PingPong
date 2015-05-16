@@ -11,7 +11,7 @@ import android.util.Log;
  */
 public class ConnectivityStatsUpload extends IntentService {
 
-    long upload_frequency_milliseconds = 100;
+    long upload_frequency_milliseconds = 500;
     String technology = "";
 
     public ConnectivityStatsUpload() {

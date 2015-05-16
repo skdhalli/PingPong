@@ -17,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
@@ -63,13 +64,11 @@ public class RestServiceClient {
         params = new ArrayList<NameValuePair>();
     }
 
-    public void AddParam(String name, String value)
-    {
+    public void AddParam(String name, String value) {
         params.add(new BasicNameValuePair(name, value));
     }
 
-    public void AddHeader(String name, String value)
-    {
+    public void AddHeader(String name, String value)  {
         headers.add(new BasicNameValuePair(name, value));
     }
 

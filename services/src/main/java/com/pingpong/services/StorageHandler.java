@@ -3,12 +3,9 @@ package com.pingpong.services;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDoneException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import java.sql.SQLClientInfoException;
-import java.sql.SQLException;
 
 /**
  * Created by sdhalli on 5/5/2015.
@@ -47,24 +44,7 @@ public class StorageHandler extends SQLiteOpenHelper {
         onUpgrade(db, oldVersion, newVersion);
     }
 
-    public void StoreConnectionStat(IConnectionStat connectionStat)
-    {
-        String insert_sql = "";
-        if(connectionStat instanceof WifiConnectionStat)
-        {
-            WifiConnectionStat wifiConnectionStat = (WifiConnectionStat)connectionStat;
-            insert_sql = "insert into WIFI_CONNECTIVITY_STATS (rssi, frequency, capabilities, bssid, ssid, timestamp, latitude, longitude) " +
-                    "values(" + wifiConnectionStat.rssi + "," + wifiConnectionStat.frequency + ",'" + wifiConnectionStat.capabilities + "','" + wifiConnectionStat.bssid + "', '" + wifiConnectionStat.ssid + "', " + wifiConnectionStat.timestamp + ", " + wifiConnectionStat.latitude + ", " + wifiConnectionStat.longitude + ")";
-        }
-        if(insert_sql != "") {
-            SQLiteDatabase writableDatabase = this.getWritableDatabase();
-            writableDatabase.execSQL(insert_sql);
-            int total_count = this.getCount();
-            Log.d("Trace", "Total count after inserting - "+total_count);
-        }
-    }
-
-    private int getCount()
+    public int getCount()
     {
         int retval = 0;
         SQLiteDatabase readableDatabase = this.getReadableDatabase();
@@ -77,48 +57,6 @@ public class StorageHandler extends SQLiteOpenHelper {
             cursor.close();
         }
         return  retval;
-    }
-    public IConnectionStat GetUploadReadyConnectionStat(String technology)
-    {
-        IConnectionStat result = null;
-        if(technology.toUpperCase().equals("WIFI")) {
-            String select_sql = "Select STAT_ID, rssi, frequency, capabilities, bssid, ssid, timestamp, latitude, longitude from WIFI_CONNECTIVITY_STATS order by STAT_ID ASC limit 1";
-            SQLiteDatabase writableDatabase = this.getWritableDatabase();
-            SQLiteDatabase readableDatabase = this.getReadableDatabase();
-            //Log.d("Trace", insert_sql);
-            Cursor cursor = readableDatabase.rawQuery(select_sql, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                WifiConnectionStat retval = new WifiConnectionStat();
-                int stat_id = cursor.getInt(0);
-                retval.stat_id = stat_id;
-                retval.rssi = cursor.getDouble(1);
-                retval.frequency = cursor.getLong(2);
-                retval.capabilities = cursor.getString(3);
-                retval.bssid = cursor.getString(4);
-                retval.ssid = cursor.getString(5);
-                retval.timestamp = cursor.getLong(6);
-                retval.latitude = cursor.getDouble(7);
-                retval.longitude = cursor.getDouble(8);
-                result = retval;
-                int total_count = this.getCount();
-                Log.d("Trace", "Total count before upload - "+total_count);
-                String delete_sql = "Delete from WIFI_CONNECTIVITY_STATS where stat_id = " + stat_id;
-                writableDatabase.execSQL(delete_sql);
-                total_count = this.getCount();
-                Log.d("Trace", "Total count after upload - "+total_count);
-            }
-            cursor.close();
-            //String count_sql = "Select * from WIFI_CONNECTIVITY_STATS";
-            //cursor = readableDatabase.rawQuery(count_sql, null);
-            //int count = cursor.getCount();
-            //cursor.close();
-            //Log.d("Trace", "Total # of stats while pulling: "+count);
-
-            writableDatabase.close();
-            readableDatabase.close();
-            //Log.d("Trace", "Executed insert");
-        }
-        return result;
     }
 
 

@@ -33,7 +33,7 @@ public class ConnectivityStatsStorage extends IntentService {
     public  static  final String network_stats_filter = "Network Stats";
     public  static final String location_stats_filter = "Location Info";
     final String newline = System.getProperty("line.separator");
-    long broadcast_frequency_milliseconds = 10000;
+    long broadcast_frequency_milliseconds = 5000;
 
     public ConnectivityStatsStorage()
     {
@@ -92,16 +92,22 @@ public class ConnectivityStatsStorage extends IntentService {
 
                         for (int i = 0; i < scannedResults.length(); i++) {
                             JSONObject scannedResult = scannedResults.getJSONObject(i);
-                            WifiConnectionStat wifiConnectionStat = new WifiConnectionStat();
-                            wifiConnectionStat.rssi = scannedResult.getDouble("RSSI");
-                            wifiConnectionStat.frequency = scannedResult.getLong("Frequency");
-                            wifiConnectionStat.capabilities = scannedResult.getString("Capabilities");
-                            wifiConnectionStat.bssid = scannedResult.getString("BSSID");
-                            wifiConnectionStat.ssid = scannedResult.getString("SSID");
-                            wifiConnectionStat.timestamp = scannedResult.getLong("Timestamp");
-                            wifiConnectionStat.latitude = location.getDouble("Latitude");
-                            wifiConnectionStat.longitude = location.getDouble("Longitude");
-                            storageHandler.StoreConnectionStat(wifiConnectionStat);
+                            String capabilities = scannedResult.getString("Capabilities");
+
+                            //if(WifiConnectionStat.security(capabilities).equals(WifiConnectionStat.OPEN))
+                            //{
+                                WifiConnectionStat wifiConnectionStat = new WifiConnectionStat();
+                                double rssi = scannedResult.getDouble("RSSI");
+                                long frequency = scannedResult.getLong("Frequency");
+                                String bssid = scannedResult.getString("BSSID");
+                                String ssid = scannedResult.getString("SSID");
+                                long timestamp = scannedResult.getLong("Timestamp");
+                                double latitude = location.getDouble("Latitude");
+                                double longitude = location.getDouble("Longitude");
+                                wifiConnectionStat.Log(rssi, frequency, capabilities, bssid,
+                                        ssid, timestamp, latitude, longitude);
+                                wifiConnectionStat.Store(this.getApplicationContext());
+                            //}
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();

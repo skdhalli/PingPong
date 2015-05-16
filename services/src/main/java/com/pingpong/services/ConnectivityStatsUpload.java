@@ -11,7 +11,7 @@ import android.util.Log;
  */
 public class ConnectivityStatsUpload extends IntentService {
 
-    long upload_frequency_milliseconds = 1000;
+    long upload_frequency_milliseconds = 100;
     String technology = "";
 
     public ConnectivityStatsUpload() {
@@ -31,23 +31,31 @@ public class ConnectivityStatsUpload extends IntentService {
                 e.printStackTrace();
             }
 
-            StorageHandler helper = new StorageHandler(this.getApplicationContext());
-            IConnectionStat connectionStat = helper.GetUploadReadyConnectionStat(technology);
-            if(connectionStat != null)
+            IConnectionStat connectionStat = null;
+            if(technology.toUpperCase().equals("WIFI"))
             {
-                try
+                connectionStat = new WifiConnectionStat();
+                long stat_id = connectionStat.SetToEarliestConnectionStat(this.getApplicationContext());
+                if(stat_id != -1)
                 {
-                    connectionStat.Upload(device_unique_id);
-                } catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
+                    try
+                    {
+                        connectionStat.Upload(device_unique_id);
+                        connectionStat.DeleteConnectionStat(this.getApplicationContext(), stat_id);
+                    } catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
 
+                }
+                else
+                {
+                    //Log.d("Trace", "No data to upload");
+                }
             }
-            else
-            {
-                //Log.d("Trace", "No data to upload");
-            }
+            //implement for other technologies too
+
+
 
         }while (true);
 
